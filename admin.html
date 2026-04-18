@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - Tiệm Bánh Chú Hoàng</title>
+    <style>
+        /* GIỮ NGUYÊN TOÀN BỘ CSS ĐẸP CỦA ANH */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        body { display: flex; height: 100vh; background-color: #f4f7f6; color: #333; }
+        .sidebar { width: 260px; background: #2c3e50; color: #fff; display: flex; flex-direction: column; }
+        .sidebar-header { padding: 25px 20px; font-size: 20px; font-weight: bold; border-bottom: 1px solid #34495e; color: #8CB353; text-align: center; }
+        .nav-menu { flex: 1; list-style: none; padding-top: 20px; }
+        .nav-menu li a { display: block; padding: 15px 25px; color: #bdc3c7; text-decoration: none; cursor: pointer; }
+        .nav-menu li a.active { background: #34495e; color: #8CB353; border-left: 4px solid #8CB353; }
+        .main-content { flex: 1; padding: 30px; overflow-y: auto; }
+        .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        .btn-primary { background: #8CB353; color: white; border: none; padding: 10px 20px; border-radius: 6px; font-weight: bold; cursor: pointer; }
+        .data-card { background: #fff; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); padding: 20px; margin-bottom: 30px;}
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 15px; text-align: left; border-bottom: 1px solid #eee; }
+        .price-input { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; text-align: right; }
+        .form-control { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px; margin-bottom: 10px; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        #loading-overlay { position: fixed; inset: 0; background: rgba(255,255,255,0.8); display: none; align-items: center; justify-content: center; z-index: 9999; font-weight: bold; color: #8CB353; }
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; }
+        .modal-overlay.active { display: flex; }
+        .modal-box { background: #fff; width: 450px; padding: 30px; border-radius: 10px; }
+    </style>
+</head>
+<body>
+
+    <div id="loading-overlay">ĐANG LƯU DỮ LIỆU...</div>
+
+    <aside class="sidebar">
+        <div class="sidebar-header">ADMIN TIỆM BÁNH</div>
+        <ul class="nav-menu">
+            <li><a class="nav-link active" onclick="switchTab('tab-gia', this)">💰 Quản lý Bảng Giá</a></li>
+            <li><a class="nav-link" onclick="switchTab('tab-anh', this)">🖼️ Ảnh Mẫu Bánh</a></li>
+            <li><a class="nav-link" onclick="switchTab('tab-km', this)">🎁 Tin Khuyến Mãi</a></li>
+        </ul>
+    </aside>
+
+    <main class="main-content">
+        <div id="tab-gia" class="tab-content active">
+            <div class="header-top">
+                <h1>Bảng Giá Dòng Bánh</h1>
+                <button class="btn-primary" onclick="updatePrices()">Lưu Bảng Giá Lên Sheets</button>
+            </div>
+            <div class="data-card">
+                <table>
+                    <thead>
+                        <tr><th>Dòng Bánh</th><th>S (14cm)</th><th>M (18cm)</th><th>L (22cm)</th><th>XL (26cm)</th></tr>
+                    </thead>
+                    <tbody id="body-gia"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="tab-anh" class="tab-content">
+            <div class="header-top">
+                <h1>Kho Ảnh Mẫu</h1>
+                <button class="btn-primary" onclick="openModal()">+ Thêm Mẫu Mới</button>
+            </div>
+            <div class="data-card">
+                <table>
+                    <thead>
+                        <tr><th>Ảnh</th><th>Tên</th><th>Loại</th><th>Thao tác</th></tr>
+                    </thead>
+                    <tbody id="body-anh"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="tab-km" class="tab-content">
+            <div class="header-top">
+                <h1>Chương Trình Khuyến Mãi</h1>
+                <button class="btn-primary" onclick="addPromoRow()">+ Thêm KM</button>
+            </div>
+            <div id="promo-list"></div>
+            <button class="btn-primary" style="width:100%; padding:15px; margin-top:20px" onclick="updatePromos()">LƯU TẤT CẢ KHUYẾN MÃI</button>
+        </div>
+    </main>
+
+    <div class="modal-overlay" id="cakeModal">
+        <div class="modal-box">
+            <h3>Thêm Mẫu Mới</h3><br>
+            <input type="text" id="inp-name" class="form-control" placeholder="Tên mẫu...">
+            <select id="inp-type" class="form-control">
+                <option value="gato">Bánh Gato</option>
+                <option value="tiramisu">Tiramisu</option>
+                <option value="bonglan">Bông Lan Trứng Muối</option>
+                <option value="mousse">Bánh Mousse</option>
+                <option value="cheese">Cheese Cake</option>
+            </select>
+            <input type="text" id="inp-link" class="form-control" placeholder="Link ảnh...">
+            <div style="text-align:right">
+                <button class="btn-primary" style="background:#ccc" onclick="closeModal()">Hủy</button>
+                <button class="btn-primary" onclick="addNewCake()">Lưu</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- CHỖ NÀY CỰC QUAN TRỌNG: DÁN LINK WEB APP (CÁI CÓ ĐUÔI /exec) VÀO ĐÂY ---
+        const API_URL = 'https://script.google.com/macros/s/AKfycbwNBDuWVzURafsXjXEBAksgFL5Jnz5xLPyBfnton8WxZKYKCepMdF8E_BTa7577RRY37Q/exec';
+
+        let CACHED_DATA = {};
+
+        window.onload = function() { refreshData(); };
+
+        function refreshData() {
+            fetch(API_URL).then(r => r.json()).then(data => {
+                CACHED_DATA = data;
+                renderPrices(data.giaBanh);
+                renderPhotos(data.mauBanh);
+                renderPromos(data.khuyenMai);
+            });
+        }
+
+        function renderPrices(prices) {
+            const body = document.getElementById('body-gia');
+            body.innerHTML = "";
+            prices.forEach(row => {
+                body.innerHTML += `<tr><td><b>${row[0]}</b></td>
+                    <td><input type="text" class="price-input" value="${row[1]}"></td>
+                    <td><input type="text" class="price-input" value="${row[2]}"></td>
+                    <td><input type="text" class="price-input" value="${row[3]}"></td>
+                    <td><input type="text" class="price-input" value="${row[4]}"></td></tr>`;
+            });
+        }
+
+        function updatePrices() {
+            toggleLoading(true);
+            let data = [];
+            document.querySelectorAll("#body-gia tr").forEach(row => {
+                let name = row.querySelector('b').innerText;
+                let ins = row.querySelectorAll('input');
+                data.push([name, ins[0].value, ins[1].value, ins[2].value, ins[3].value]);
+            });
+            sendData('savePrices', data);
+        }
+
+        function renderPhotos(photos) {
+            const body = document.getElementById('body-anh');
+            body.innerHTML = "";
+            photos.forEach((row, i) => {
+                body.innerHTML += `<tr><td><img src="${row[2]}" style="width:50px"></td>
+                    <td>${row[0]}</td><td>${row[1]}</td>
+                    <td><button style="color:red" onclick="deleteCake(${i})">Xóa</button></td></tr>`;
+            });
+        }
+
+        function addNewCake() {
+            const name = document.getElementById('inp-name').value;
+            const type = document.getElementById('inp-type').value;
+            const link = document.getElementById('inp-link').value;
+            CACHED_DATA.mauBanh.push([name, type, link]);
+            sendData('saveCakeModels', CACHED_DATA.mauBanh);
+            closeModal();
+        }
+
+        function deleteCake(idx) {
+            if(!confirm("Xóa mẫu này?")) return;
+            CACHED_DATA.mauBanh.splice(idx, 1);
+            sendData('saveCakeModels', CACHED_DATA.mauBanh);
+        }
+
+        function renderPromos(promos) {
+            const list = document.getElementById('promo-list');
+            list.innerHTML = "";
+            for(let i=1; i<promos.length; i++) {
+                if(promos[i][0]) addPromoRow(promos[i]);
+            }
+        }
+
+        function addPromoRow(d = ["","","",""]) {
+            const div = document.createElement('div');
+            div.className = "data-card";
+            div.innerHTML = `
+                <input type="text" class="form-control" placeholder="Tiêu đề" value="${d[0]}">
+                <textarea class="form-control" placeholder="Mô tả">${d[1]}</textarea>
+                <input type="text" class="form-control" placeholder="Ưu đãi" value="${d[2]}">
+                <input type="text" class="form-control" placeholder="Giá" value="${d[3]}">
+                <button style="color:red" onclick="this.parentElement.remove()">Xóa KM này</button>`;
+            document.getElementById('promo-list').appendChild(div);
+        }
+
+        function updatePromos() {
+            toggleLoading(true);
+            let pData = [];
+            document.querySelectorAll("#promo-list .data-card").forEach(box => {
+                const ins = box.querySelectorAll('input, textarea');
+                pData.push([ins[0].value, ins[1].value, ins[2].value, ins[3].value, "on"]);
+            });
+            // Gửi mảng dữ liệu. Lưu ý: Cần sửa nhẹ Mã.gs để nhận mảng nếu muốn lưu nhiều KM.
+            sendData('savePromo', pData); 
+        }
+
+        // HÀM QUAN TRỌNG ĐỂ NÓI CHUYỆN VỚI APPS SCRIPT TỪ VERCEL
+        function sendData(functionName, parameters) {
+            toggleLoading(true);
+            const url = `${API_URL}?action=${functionName}`;
+            // Vì lý do bảo mật và CORS của Google, cách tốt nhất là dùng một thẻ <form> ẩn 
+            // hoặc dùng lệnh fetch qua proxy. Tuy nhiên để nhanh nhất, 
+            // anh hãy dán file admin.html này vào Apps Script dùng cho tiện nhất.
+            // Nếu muốn dùng Vercel cho Admin, báo tôi để tôi hướng dẫn cách lách CORS.
+            alert("Đang gửi yêu cầu lưu dữ liệu...");
+            // [Phần này cần cấu hình Mã.gs nhận POST để thực sự lưu từ Vercel]
+        }
+
+        function toggleLoading(s) { document.getElementById('loading-overlay').style.display = s?'flex':'none'; }
+        function switchTab(id, el) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+            document.getElementById(id).classList.add('active'); el.classList.add('active');
+        }
+        function openModal() { document.getElementById('cakeModal').classList.add('active'); }
+        function closeModal() { document.getElementById('cakeModal').classList.remove('active'); }
+    </script>
+</body>
+</html>

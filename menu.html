@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Menu - Tiệm Bánh Chú Hoàng</title>
+    <style>
+        /* ====== GIỮ NGUYÊN STYLE TRANG CHỦ ====== */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        body { background-color: #FAFCF7; color: #333; line-height: 1.6; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+
+        /* HEADER & LOGO */
+        .site-header { background-color: #ffffff; box-shadow: 0 4px 15px rgba(0,0,0,0.03); position: sticky; top: 0; z-index: 100; }
+        .header-container { display: flex; justify-content: space-between; align-items: center; height: 80px; }
+        .logo a { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+        .logo img { height: 60px; object-fit: contain; }
+        .logo span { font-size: 24px; font-weight: 800; color: #2c3e50; }
+        .logo span .highlight { color: #8CB353; }
+        .main-nav ul { list-style: none; display: flex; gap: 35px; }
+        .main-nav a { text-decoration: none; color: #444; font-weight: 600; font-size: 15px; text-transform: uppercase; transition: 0.3s; }
+        .main-nav a:hover, .main-nav a.active { color: #8CB353; }
+
+        /* MENU NAVIGATION (Dòng bánh) */
+        .filter-buttons { display: flex; justify-content: center; gap: 10px; margin: 40px 0; flex-wrap: wrap; }
+        .btn-filter { background: white; border: 2px solid #DDE8CD; padding: 12px 25px; border-radius: 30px; cursor: pointer; font-weight: bold; transition: 0.3s; }
+        .btn-filter.active { background: #8CB353; color: white; border-color: #8CB353; box-shadow: 0 4px 10px rgba(140, 179, 83, 0.3); }
+
+        /* PRICE BOARD */
+        .price-board { background: white; padding: 30px; border-radius: 20px; text-align: center; border-top: 5px solid #8CB353; margin-bottom: 40px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        .price-list { display: flex; justify-content: center; gap: 15px; flex-wrap: wrap; list-style: none; margin-top: 20px; }
+        .price-item { background: #F8FAF3; padding: 15px; border-radius: 12px; min-width: 140px; border: 1px solid #eee; }
+        .price-item span { display: block; font-size: 13px; color: #888; margin-bottom: 5px; }
+        .price-item strong { font-size: 18px; color: #E74C3C; }
+
+        /* GALLERY */
+        .image-gallery { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 25px; margin-bottom: 60px; }
+        .gallery-item { background: white; border-radius: 15px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.05); cursor: pointer; transition: 0.3s; }
+        .gallery-item:hover { transform: translateY(-5px); }
+        .gallery-item img { width: 100%; height: 280px; object-fit: cover; }
+        .item-info { padding: 15px; text-align: center; font-weight: bold; color: #2c3e50; }
+
+        /* FOOTER */
+        .site-footer { background-color: #2c3e50; color: #ecf0f1; padding: 60px 0 20px; border-top: 5px solid #8CB353; font-size: 14px; margin-top: 60px; }
+        .footer-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 40px; }
+        .footer-col h4 { color: #8CB353; margin-bottom: 20px; text-transform: uppercase; }
+
+        /* MODAL */
+        .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.7); display: none; align-items: center; justify-content: center; z-index: 1000; padding: 20px; }
+        .modal.active { display: flex; }
+        .modal-box { background: white; width: 100%; max-width: 850px; border-radius: 20px; display: flex; flex-wrap: wrap; overflow: hidden; animation: zoom 0.3s ease; }
+        .modal-img { width: 50%; height: 450px; object-fit: cover; }
+        .modal-info { width: 50%; padding: 40px; }
+        .form-control { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 8px; }
+        .btn-order { width: 100%; padding: 15px; background: #8CB353; color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; }
+
+        @media (max-width: 768px) {
+            .modal-box { flex-direction: column; overflow-y: auto; height: 90vh; }
+            .modal-img, .modal-info { width: 100%; }
+            .main-nav { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <header class="site-header">
+        <div class="container header-container">
+            <div class="logo">
+                <a href="index.html">
+                    <img src="logo.jpg" alt="Logo">
+                    <span>Tiệm Bánh <span class="highlight">Chú Hoàng</span></span>
+                </a>
+            </div>
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="index.html">Trang chủ</a></li>
+                    <li><a href="menu.html" class="active">Menu Bánh</a></li>
+                    <li><a href="index.html#tin-tuc">Khuyến mãi</a></li>
+                    <li><a href="#lien-he">Liên hệ</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="filter-buttons" id="filter-container">
+            </div>
+
+        <div id="price-section"></div>
+        <div class="image-gallery" id="gallery-container">
+            <p style="text-align:center; width:100%; padding:50px;">Đang tải danh sách bánh...</p>
+        </div>
+    </div>
+
+    <div id="orderModal" class="modal">
+        <div class="modal-box">
+            <img id="m-img" class="modal-img">
+            <div class="modal-info">
+                <h2 id="m-name"></h2>
+                <p id="m-cat" style="color:#8CB353; font-weight:bold; margin-bottom:20px;"></p>
+                <label>Chọn Size:</label>
+                <select id="m-size" class="form-control"></select>
+                <input type="text" id="m-user" class="form-control" placeholder="Tên khách hàng">
+                <input type="tel" id="m-phone" class="form-control" placeholder="Số điện thoại">
+                <button class="btn-order" onclick="sendZalo()">XÁC NHẬN QUA ZALO</button>
+                <button onclick="closeModal()" style="margin-top:15px; background:none; border:none; color:#999; cursor:pointer; width:100%;">Quay lại</button>
+            </div>
+        </div>
+    </div>
+
+    <footer id="lien-he" class="site-footer">
+        <div class="container">
+            <div class="footer-container">
+                <div class="footer-col">
+                    <h4>Tiệm Bánh Chú Hoàng</h4>
+                    <p>MST: 2500xxxxxx</p>
+                    <p>Đại diện: Anh Hưng</p>
+                </div>
+                <div class="footer-col">
+                    <h4>Liên Hệ</h4>
+                    <p>36 Sóc Sơn, Phúc Yên, Vĩnh Phúc</p>
+                    <p>076 789 5010</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // QUAN TRỌNG: Dán Link Apps Script của anh vào đây
+        const API_URL = 'https://script.google.com/macros/s/AKfycbwNBDuWVzURafsXjXEBAksgFL5Jnz5xLPyBfnton8WxZKYKCepMdF8E_BTa7577RRY37Q/exec';
+        
+        let ALL_DATA = { giaBanh: [], mauBanh: [] };
+        const CAT_MAP = {
+            "gato": "Bánh Gato",
+            "tiramisu": "Tiramisu",
+            "bonglan": "Bông Lan Trứng Muối",
+            "mousse": "Bánh Mousse",
+            "cheese": "Cheese Cake"
+        };
+
+        window.onload = function() {
+            fetch(API_URL)
+                .then(r => r.json())
+                .then(data => {
+                    ALL_DATA = data;
+                    const filterBox = document.getElementById('filter-container');
+                    filterBox.innerHTML = "";
+                    Object.keys(CAT_MAP).forEach((key, idx) => {
+                        const btn = document.createElement('button');
+                        btn.className = `btn-filter ${idx===0?'active':''}`;
+                        btn.innerText = CAT_MAP[key];
+                        btn.onclick = () => showCategory(key, btn);
+                        filterBox.appendChild(btn);
+                    });
+                    showCategory("gato", filterBox.querySelector('.btn-filter'));
+                });
+        };
+
+        function showCategory(id, btn) {
+            document.querySelectorAll('.btn-filter').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+
+            const priceSec = document.getElementById('price-section');
+            const row = ALL_DATA.giaBanh.find(r => r[0].toString().toLowerCase().includes(CAT_MAP[id].toLowerCase()));
+            if(row) {
+                priceSec.innerHTML = `<div class="price-board"><h3>Bảng Giá ${CAT_MAP[id]}</h3>
+                <div class="price-list">
+                    <div class="price-item"><span>Size S</span><strong>${row[1]}</strong></div>
+                    <div class="price-item"><span>Size M</span><strong>${row[2]}</strong></div>
+                    <div class="price-item"><span>Size L</span><strong>${row[3]}</strong></div>
+                    <div class="price-item"><span>Size XL</span><strong>${row[4]}</strong></div>
+                </div></div>`;
+            }
+
+            const gallery = document.getElementById('gallery-container');
+            gallery.innerHTML = "";
+            const models = ALL_DATA.mauBanh.filter(m => m[1].toString().toLowerCase() === id);
+            models.forEach(m => {
+                gallery.innerHTML += `<div class="gallery-item" onclick="openOrder('${id}','${m[0]}','${m[2]}')">
+                    <img src="${m[2]}" onerror="this.src='https://via.placeholder.com/300'">
+                    <div class="item-info">${m[0]}</div></div>`;
+            });
+        }
+
+        function openOrder(catId, name, img) {
+            document.getElementById('m-img').src = img;
+            document.getElementById('m-name').innerText = name;
+            document.getElementById('m-cat').innerText = CAT_MAP[catId];
+            const row = ALL_DATA.giaBanh.find(r => r[0].toString().toLowerCase().includes(CAT_MAP[catId].toLowerCase()));
+            const select = document.getElementById('m-size');
+            select.innerHTML = `<option value="S - ${row[1]}">Size S - ${row[1]}</option><option value="M - ${row[2]}">Size M - ${row[2]}</option><option value="L - ${row[3]}">Size L - ${row[3]}</option><option value="XL - ${row[4]}">Size XL - ${row[4]}</option>`;
+            document.getElementById('orderModal').classList.add('active');
+        }
+
+        function closeModal() { document.getElementById('orderModal').classList.remove('active'); }
+
+        function sendZalo() {
+            const text = `Đặt bánh: ${document.getElementById('m-name').innerText}\nSize: ${document.getElementById('m-size').value}\nKhách: ${document.getElementById('m-user').value}\nSĐT: ${document.getElementById('m-phone').value}`;
+            navigator.clipboard.writeText(text).then(() => {
+                alert("Đã copy đơn! Hãy dán vào Zalo tiệm.");
+                window.open("https://zalo.me/84767895010", "_blank");
+            });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thực Đơn - Tiệm Bánh Chú Hoàng</title>
+    <style>
+        /* ====== GIAO DIỆN CHUẨN ====== */
+        :root { --primary: #8CB353; --dark: #2c3e50; --light: #FAFCF7; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        body { background-color: var(--light); color: #333; line-height: 1.6; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+
+        /* HEADER */
+        .site-header { background: #fff; box-shadow: 0 4px 15px rgba(0,0,0,0.03); position: sticky; top: 0; z-index: 100; }
+        .header-flex { display: flex; justify-content: space-between; align-items: center; height: 80px; }
+        .logo a { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+        .logo img { height: 60px; object-fit: contain; }
+        .logo span { font-size: 24px; font-weight: 800; color: var(--dark); }
+        .logo .highlight { color: var(--primary); }
+        .main-nav ul { list-style: none; display: flex; gap: 30px; }
+        .main-nav a { text-decoration: none; color: #444; font-weight: 600; font-size: 14px; text-transform: uppercase; transition: 0.3s; }
+        .main-nav a:hover, .main-nav a.active { color: var(--primary); }
+
+        /* MENU TIEU DE & BO LOC */
+        .page-title { text-align: center; margin: 40px 0 20px; font-size: 32px; color: var(--dark); text-transform: uppercase; }
+        .filter-buttons { display: flex; justify-content: center; gap: 12px; margin-bottom: 40px; flex-wrap: wrap; }
+        .btn-filter { background: white; border: 2px solid #DDE8CD; padding: 12px 25px; border-radius: 30px; cursor: pointer; font-weight: bold; transition: 0.3s; color: #555; font-size: 15px; }
+        .btn-filter:hover { border-color: var(--primary); }
+        .btn-filter.active { background: var(--primary); color: white; border-color: var(--primary); box-shadow: 0 4px 10px rgba(140, 179, 83, 0.3); }
+
+        /* BẢNG GIÁ */
+        .price-board { background: white; padding: 30px; border-radius: 20px; text-align: center; border-top: 5px solid var(--primary); margin-bottom: 40px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        .price-board h2 { color: var(--dark); margin-bottom: 20px; font-size: 24px; }
+        .price-list { display: flex; justify-content: center; gap: 15px; flex-wrap: wrap; list-style: none; }
+        .price-item { background: var(--light); padding: 15px; border-radius: 12px; min-width: 150px; border: 1px solid #eee; }
+        .price-item span { display: block; font-size: 14px; color: #888; margin-bottom: 5px; font-weight: 600; }
+        .price-item b { font-size: 22px; color: #E74C3C; }
+
+        /* LƯỚI ẢNH MẪU */
+        .gallery { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 25px; margin-bottom: 60px; min-height: 300px; }
+        .cake-card { background: white; border-radius: 15px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.05); cursor: pointer; transition: 0.3s; border: 1px solid #f0f0f0; }
+        .cake-card:hover { transform: translateY(-8px); box-shadow: 0 12px 25px rgba(0,0,0,0.1); }
+        .cake-card img { width: 100%; height: 280px; object-fit: cover; display: block; }
+        .cake-info { padding: 20px; text-align: center; }
+        .cake-info h3 { font-size: 18px; color: var(--dark); margin-bottom: 10px; }
+        .btn-buy-outline { display: inline-block; padding: 8px 20px; border: 2px solid var(--primary); color: var(--primary); border-radius: 20px; font-weight: bold; font-size: 14px; transition: 0.3s; }
+        .cake-card:hover .btn-buy-outline { background: var(--primary); color: white; }
+
+        /* MODAL ĐẶT HÀNG */
+        .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: none; align-items: center; justify-content: center; z-index: 1000; padding: 20px; }
+        .modal.active { display: flex; animation: fadeInModal 0.3s ease; }
+        @keyframes fadeInModal { from { opacity: 0; } to { opacity: 1; } }
+        
+        .modal-box { background: white; width: 100%; max-width: 900px; border-radius: 20px; display: flex; flex-wrap: wrap; overflow: hidden; position: relative; max-height: 90vh; }
+        .close-btn { position: absolute; top: 15px; right: 20px; font-size: 28px; cursor: pointer; color: #999; line-height: 1; z-index: 10; transition: 0.3s; }
+        .close-btn:hover { color: #333; }
+        
+        .m-left { width: 45%; }
+        .m-left img { width: 100%; height: 100%; object-fit: cover; min-height: 400px; }
+        
+        .m-right { width: 55%; padding: 30px; overflow-y: auto; }
+        .m-right h2 { font-size: 24px; color: var(--dark); margin-bottom: 5px; }
+        .m-right .m-cat { color: var(--primary); font-weight: bold; margin-bottom: 15px; font-size: 15px; }
+        
+        /* CÁC BƯỚC ĐẶT HÀNG (STEPS) */
+        .step-container { display: none; animation: fadeInModal 0.3s ease; }
+        .step-container.active { display: block; }
+
+        .qr-section { background: #fdfdfd; border: 2px dashed #DDE8CD; padding: 20px; border-radius: 12px; text-align: center; margin-bottom: 20px; }
+        .qr-section img { width: 200px; height: 200px; object-fit: contain; border-radius: 8px; margin: 15px 0; border: 1px solid #eee; }
+        .qr-section p { font-size: 14px; color: #555; margin-bottom: 10px; }
+        .qr-section .bank-info { font-weight: bold; color: var(--dark); font-size: 16px; margin-top: 10px; line-height: 1.5; }
+
+        .form-row { display: flex; gap: 15px; }
+        .form-row .form-group { flex: 1; }
+
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; font-size: 13px; font-weight: bold; margin-bottom: 6px; color: #555; text-transform: uppercase; }
+        .form-control { width: 100%; padding: 10px 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; outline: none; transition: 0.3s; background: #fafafa; }
+        .form-control:focus { border-color: var(--primary); background: white; }
+        
+        .deposit-note { background: #FFF3CD; color: #856404; padding: 12px; border-radius: 8px; font-size: 13px; margin-bottom: 15px; border-left: 4px solid #FFEEBA; }
+        
+        .btn-order-zalo { width: 100%; padding: 15px; background: var(--primary); color: white; border: none; border-radius: 10px; font-weight: bold; font-size: 16px; cursor: pointer; transition: 0.3s; }
+        .btn-order-zalo:hover { background: #749642; }
+        
+        .btn-secondary { width: 100%; padding: 12px; background: #f0f0f0; color: #333; border: none; border-radius: 10px; font-weight: bold; font-size: 15px; cursor: pointer; transition: 0.3s; margin-bottom: 10px; }
+        .btn-secondary:hover { background: #e0e0e0; }
+
+        /* FLOATING CONTACT & FOOTER */
+        .float-btns { position: fixed; bottom: 30px; left: 30px; z-index: 100; display: flex; flex-direction: column; gap: 15px; }
+        .f-btn { width: 55px; height: 55px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; text-decoration: none; box-shadow: 0 4px 12px rgba(0,0,0,0.2); font-weight: bold; transition: 0.3s; }
+        .f-btn:hover { transform: scale(1.1); }
+        .btn-zalo { background: #0068FF; }
+        .btn-call { background: #00B14F; }
+        .btn-fb { background: #1877F2; }
+
+        .site-footer { background: var(--dark); color: #ecf0f1; padding: 60px 0 30px; border-top: 5px solid var(--primary); margin-top: 60px; }
+        .footer-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 40px; }
+        .footer-col h4 { color: var(--primary); margin-bottom: 20px; text-transform: uppercase; }
+        .footer-col p { margin-bottom: 10px; font-size: 14px; opacity: 0.8; }
+
+        /* ĐIỆN THOẠI */
+        @media (max-width: 768px) { 
+            .main-nav { display: none; } 
+            .m-left, .m-right { width: 100%; }
+            .m-left img { height: 250px; min-height: auto; }
+            .m-right { padding: 20px; }
+            .form-row { flex-direction: column; gap: 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <header class="site-header">
+        <div class="container header-flex">
+            <div class="logo">
+                <a href="index.html">
+                    <img src="logo.jpg" alt="Tiệm Bánh Chú Hoàng">
+                    <span>Tiệm Bánh <span class="highlight">Chú Hoàng</span></span>
+                </a>
+            </div>
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="index.html">Trang chủ</a></li>
+                    <li><a href="menu.html" class="active">Thực Đơn</a></li>
+                    <li><a href="index.html#khuyen-mai">Khuyến Mãi</a></li>
+                    <li><a href="#lien-he">Liên Hệ</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <div class="container">
+        <h1 class="page-title">Khám Phá Menu Bánh</h1>
+        <div class="filter-buttons" id="filter-box"><p>Đang chuẩn bị bộ lọc...</p></div>
+        <div id="price-section"></div>
+        <div class="gallery" id="gallery-box"><p style="text-align: center; width: 100%; color: #888; padding: 50px;">Đang tải danh sách bánh từ hệ thống...</p></div>
+    </div>
+
+    <div id="orderModal" class="modal">
+        <div class="modal-box">
+            <div class="close-btn" onclick="closeModal()">&times;</div>
+            
+            <div class="m-left">
+                <img id="m-img" src="" alt="Ảnh bánh">
+            </div>
+            
+            <div class="m-right">
+                <h2 id="m-name">Tên Bánh</h2>
+                <p id="m-cat" class="m-cat">Loại bánh</p>
+                
+                <div id="step-1" class="step-container active">
+                    <div class="form-group">
+                        <label>1. Chọn Kích Thước (Size) & Giá:</label>
+                        <select id="m-size" class="form-control"></select>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>2. Tên Anh/Chị:</label>
+                            <input type="text" id="m-user" class="form-control" placeholder="Tên khách hàng">
+                        </div>
+                        <div class="form-group">
+                            <label>3. Số Điện Thoại:</label>
+                            <input type="tel" id="m-phone" class="form-control" placeholder="SĐT liên hệ">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>4. Ngày Lấy Bánh:</label>
+                            <input type="date" id="m-date" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label>5. Giờ Lấy Bánh:</label>
+                            <input type="time" id="m-time" class="form-control">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>6. Hình Thức Nhận Bánh:</label>
+                        <select id="m-delivery" class="form-control" onchange="toggleAddressField()">
+                            <option value="Tới tiệm lấy (Pick up)">Tới tiệm lấy trực tiếp (Pick up)</option>
+                            <option value="Ship tận nơi">Giao hàng tận nơi (Ship)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group" id="address-box" style="display: none;">
+                        <label>Địa chỉ nhận bánh cụ thể:</label>
+                        <input type="text" id="m-address" class="form-control" placeholder="Nhập địa chỉ giao hàng...">
+                    </div>
+                    
+                    <button class="btn-order-zalo" onclick="goToStep2()">TIẾP TỤC THANH TOÁN / ĐẶT CỌC</button>
+                </div>
+
+                <div id="step-2" class="step-container">
+                    <div class="deposit-note">
+                        <strong>Lưu ý:</strong> Tiệm xin phép nhận chuyển khoản cọc trước 50% (hoặc thanh toán toàn bộ) để chốt lịch và tiến hành làm bánh ạ.
+                    </div>
+
+                    <div class="qr-section">
+                        <p style="font-weight: bold; color: var(--primary);">MÃ QR CHUYỂN KHOẢN</p>
+                        <p>Nội dung CK: <strong style="color:#E74C3C">Tên + SĐT của anh/chị</strong></p>
+                        
+                        <img src="qr.jpg" alt="Mã QR Tiệm Bánh">
+                        
+                        <div class="bank-info">
+                            Ngân hàng: VietTinBank<br>
+                            STK: 1028804487861<br>
+                            Tên TK: Hoàng Thạch Hưng
+                        </div>
+                    </div>
+
+                    <button class="btn-secondary" onclick="backToStep1()">Quay lại sửa thông tin</button>
+                    <button class="btn-order-zalo" onclick="sendZalo()">ĐÃ CHUYỂN KHOẢN & GỬI ZALO</button>
+                </div>
+                
+            </div>
+        </div>
+    </div>
+
+    <div class="float-btns">
+        <a href="tel:0767895010" class="f-btn btn-call">Gọi</a>
+        <a href="https://zalo.me/84767895010" target="_blank" class="f-btn btn-zalo">Zalo</a>
+        <a href="https://www.facebook.com/profile.php?id=61566439867079" target="_blank" class="f-btn btn-fb">FB</a>
+    </div>
+
+    <footer id="lien-he" class="site-footer">
+        <div class="container footer-grid">
+            <div class="footer-col">
+                <h4>Thông Tin Tiệm</h4>
+                <p><strong>MST:</strong> 2500xxxxxx</p>
+                <p><strong>Đại diện:</strong> Anh Hưng</p>
+                <p>Tiệm Bánh Chú Hoàng chuyên các dòng bánh kem cao cấp, bánh sinh nhật, Tiramisu tươi mỗi ngày.</p>
+            </div>
+            <div class="footer-col">
+                <h4>Liên Hệ</h4>
+                <p>📍 36 Sóc Sơn, Phường Trưng Trắc, TP. Phúc Yên, Vĩnh Phúc</p>
+                <p>📞 076 789 5010</p>
+                <p>⏰ 07:30 - 21:30 (Cả tuần)</p>
+            </div>
+        </div>
+        <div class="container" style="text-align:center; margin-top:40px; padding-top:20px; border-top:1px solid rgba(255,255,255,0.1);">
+            <p style="font-size:12px; opacity:0.5;">© 2026 Tiệm Bánh Chú Hoàng. Thiết kế bởi Hoàng Tuấn Anh.</p>
+        </div>
+    </footer>
+
+    <script>
+        // QUAN TRỌNG: DÁN LINK APPS SCRIPT VÀO ĐÂY
+        const API_URL = 'Dhttps://script.google.com/macros/s/AKfycbwl3fJyIx8KVhHDrelcytMppq5Ekw9knYPf2mVXyfISuNli_ay4XawAc7spnAatRzxgUQ/exec';
+        
+        let ALL_DATA = { giaBanh: [], mauBanh: [] };
+        const CATS = { "gato": "Bánh Gato", "tiramisu": "Tiramisu", "bonglan": "Bông Lan Trứng Muối", "mousse": "Bánh Mousse", "cheese": "Cheese Cake" };
+
+        window.onload = function() {
+            const cachedData = localStorage.getItem('chuHoangData');
+            if(cachedData) {
+                ALL_DATA = JSON.parse(cachedData);
+                renderMenu("gato"); 
+            }
+            fetch(API_URL).then(response => response.json()).then(data => {
+                ALL_DATA = data;
+                localStorage.setItem('chuHoangData', JSON.stringify(data));
+                if(!cachedData) renderMenu("gato");
+            }).catch(err => console.log("Lỗi tải API"));
+        };
+
+        function renderMenu(activeId) {
+            const filterContainer = document.getElementById('filter-box'); filterContainer.innerHTML = "";
+            Object.keys(CATS).forEach(key => {
+                filterContainer.innerHTML += `<button class="btn-filter ${key === activeId ? 'active' : ''}" onclick="renderMenu('${key}')">${CATS[key]}</button>`;
+            });
+
+            const priceSection = document.getElementById('price-section');
+            let row = ALL_DATA.giaBanh.find(r => r[0] && r[0].toString().toLowerCase().includes(CATS[activeId].toLowerCase()));
+            if (!row) row = [CATS[activeId], "Liên hệ", "Liên hệ", "Liên hệ", "Liên hệ"];
+
+            priceSection.innerHTML = `
+                <div class="price-board">
+                    <h2>Bảng Giá Mới Nhất - ${CATS[activeId]}</h2>
+                    <div class="price-list">
+                        <div class="price-item"><span>Size S (14cm)</span><b>${row[1]}</b></div>
+                        <div class="price-item"><span>Size M (18cm)</span><b>${row[2]}</b></div>
+                        <div class="price-item"><span>Size L (22cm)</span><b>${row[3]}</b></div>
+                        <div class="price-item"><span>Size XL (26cm)</span><b>${row[4]}</b></div>
+                    </div>
+                </div>`;
+
+            const galleryBox = document.getElementById('gallery-box'); galleryBox.innerHTML = "";
+            const filteredCakes = ALL_DATA.mauBanh.filter(item => item[1] && item[1].toString().toLowerCase().trim() === activeId);
+            
+            if (filteredCakes.length > 0) {
+                filteredCakes.forEach(cake => {
+                    galleryBox.innerHTML += `
+                        <div class="cake-card" onclick="openOrder('${activeId}', '${cake[0].replace(/'/g, "\\'")}', '${cake[2]}')">
+                            <img src="${cake[2]}" onerror="this.src='https://via.placeholder.com/300?text=Loi+Anh'">
+                            <div class="cake-info">
+                                <h3>${cake[0]}</h3>
+                                <span class="btn-buy-outline">Chọn Đặt Size Bánh</span>
+                            </div>
+                        </div>`;
+                });
+            } else {
+                galleryBox.innerHTML = `<p style="text-align:center; width:100%; color:#999; padding:40px;">Chưa có ảnh mẫu cho dòng bánh này.</p>`;
+            }
+        }
+
+        function setDefaultDateTime() {
+            const today = new Date();
+            today.setDate(today.getDate() + 1); 
+            document.getElementById('m-date').value = today.toISOString().split('T')[0];
+            document.getElementById('m-time').value = new Date().toTimeString().substring(0, 5);
+        }
+
+        function openOrder(catId, cakeName, cakeImg) {
+            document.getElementById('m-img').src = cakeImg;
+            document.getElementById('m-name').innerText = cakeName;
+            document.getElementById('m-cat').innerText = CATS[catId];
+            
+            let row = ALL_DATA.giaBanh.find(r => r[0] && r[0].toString().toLowerCase().includes(CATS[catId].toLowerCase()));
+            if (!row) row = [CATS[catId], "Liên hệ", "Liên hệ", "Liên hệ", "Liên hệ"];
+            
+            document.getElementById('m-size').innerHTML = `
+                <option value="Size S - ${row[1]}">Size S (14cm) - ${row[1]}</option>
+                <option value="Size M - ${row[2]}">Size M (18cm) - ${row[2]}</option>
+                <option value="Size L - ${row[3]}">Size L (22cm) - ${row[3]}</option>
+                <option value="Size XL - ${row[4]}">Size XL (26cm) - ${row[4]}</option>
+            `;
+            
+            setDefaultDateTime();
+            
+            // Đảm bảo mỗi lần mở Modal đều ở Bước 1
+            backToStep1(); 
+            document.getElementById('orderModal').classList.add('active');
+        }
+
+        function closeModal() { 
+            document.getElementById('orderModal').classList.remove('active'); 
+        }
+
+        function toggleAddressField() {
+            const type = document.getElementById('m-delivery').value;
+            document.getElementById('address-box').style.display = (type === "Ship tận nơi") ? "block" : "none";
+        }
+
+        // CHUYỂN TỪ BƯỚC 1 SANG BƯỚC 2 (KIỂM TRA THÔNG TIN TRƯỚC KHI HIỆN QR)
+        function goToStep2() {
+            const userName = document.getElementById('m-user').value.trim();
+            const userPhone = document.getElementById('m-phone').value.trim();
+            const date = document.getElementById('m-date').value;
+            const time = document.getElementById('m-time').value;
+            const deliveryType = document.getElementById('m-delivery').value;
+            const address = document.getElementById('m-address').value.trim();
+            
+            if (!userName || !userPhone || !date || !time) {
+                alert("Dạ anh/chị vui lòng điền đủ Tên, SĐT, Ngày và Giờ lấy bánh nhé!");
+                return;
+            }
+            if (deliveryType === "Ship tận nơi" && !address) {
+                alert("Dạ anh/chị chọn Ship thì cho em xin thêm Địa chỉ nhận bánh ạ!");
+                return;
+            }
+
+            document.getElementById('step-1').classList.remove('active');
+            document.getElementById('step-2').classList.add('active');
+        }
+
+        // QUAY LẠI BƯỚC 1 ĐỂ SỬA THÔNG TIN
+        function backToStep1() {
+            document.getElementById('step-2').classList.remove('active');
+            document.getElementById('step-1').classList.add('active');
+        }
+
+        // GỬI THÔNG TIN SANG ZALO
+        function sendZalo() {
+            const cakeName = document.getElementById('m-name').innerText;
+            const cakeSize = document.getElementById('m-size').value;
+            const userName = document.getElementById('m-user').value.trim();
+            const userPhone = document.getElementById('m-phone').value.trim();
+            const date = document.getElementById('m-date').value;
+            const time = document.getElementById('m-time').value;
+            const deliveryType = document.getElementById('m-delivery').value;
+            const address = document.getElementById('m-address').value.trim();
+            
+            const addressText = deliveryType === "Ship tận nơi" ? `📍 Địa chỉ ship: ${address}\n` : "";
+
+            const messageText = 
+                `Xin chào Tiệm Bánh Chú Hoàng, em muốn lên đơn:\n` +
+                `---------------------------\n` +
+                `🍰 Bánh: ${cakeName}\n` +
+                `📏 Size & Giá: ${cakeSize}\n` +
+                `👤 Khách: ${userName}\n` +
+                `📞 SĐT: ${userPhone}\n` +
+                `📅 Thời gian nhận: ${time} ngày ${date.split('-').reverse().join('/')}\n` +
+                `🚚 Hình thức: ${deliveryType}\n` +
+                addressText +
+                `---------------------------\n` +
+                `* Em đã lưu bill chuyển khoản cọc, tiệm kiểm tra và xác nhận lịch giúp em nhé!`;
+
+            navigator.clipboard.writeText(messageText).then(() => {
+                alert("✅ Đã chốt đơn thành công!\n\nTrình duyệt sẽ chuyển sang Zalo, anh/chị nhớ DÁN (Paste) tin nhắn và GỬI kèm ảnh chụp màn hình chuyển khoản nhé.");
+                window.open("https://zalo.me/84767895010", "_blank");
+            }).catch(err => {
+                alert("Trình duyệt chặn Copy. Anh/chị vui lòng nhắn tin thủ công qua Zalo: 076 789 5010");
+                window.open("https://zalo.me/84767895010", "_blank");
+            });
+            
+            closeModal();
+        }
+    </script>
+</body>
+</html>
